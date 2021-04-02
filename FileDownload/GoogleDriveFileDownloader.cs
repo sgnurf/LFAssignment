@@ -2,6 +2,7 @@
 using Google.Apis.Drive.v3;
 using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DataIngestion.TestAssignment.FileDownload
@@ -15,7 +16,7 @@ namespace DataIngestion.TestAssignment.FileDownload
             this.googleServiceInitialiseProvider = googleServiceInitialiseProvider;
         }
 
-        public async Task DownloadAsync(string fileId, string destinationFile)
+        public async Task DownloadAsync(string fileId, string destinationFile, CancellationToken cancellationToken)
         {
             var initializer = googleServiceInitialiseProvider.GetInitialiser();
             DriveService driveService = new DriveService(initializer);
@@ -24,7 +25,7 @@ namespace DataIngestion.TestAssignment.FileDownload
 
             using (FileStream fileStream = File.Create(destinationFile))
             {
-                downloadStatus = await driveService.Files.Get(fileId).DownloadAsync(fileStream);
+                downloadStatus = await driveService.Files.Get(fileId).DownloadAsync(fileStream, cancellationToken);
             }
 
             if (downloadStatus.Status != DownloadStatus.Completed)

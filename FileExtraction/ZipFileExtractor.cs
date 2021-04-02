@@ -6,7 +6,7 @@ namespace DataIngestion.TestAssignment.FileExtraction
     {
         public void Extract(string archiveFile, string destinationFolder)
         {
-            ZipFile.ExtractToDirectory(archiveFile, destinationFolder);
+            ZipFile.ExtractToDirectory(archiveFile, destinationFolder, overwriteFiles: true);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace DataIngestion.TestAssignment.Configuration
 {
-    public class FilesToIngestConfiguration
+    public class InputFiles
     {
         public string Artist { get; set; }
         public string Collection { get; set; }

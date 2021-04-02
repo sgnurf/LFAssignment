@@ -1,13 +1,19 @@
 ﻿using DataIngestion.TestAssignment.Configuration;
+using DataIngestion.TestAssignment.InputModels;
 using DataIngestion.TestAssignment.Extensions;
 using DataIngestion.TestAssignment.FileDownload;
 using DataIngestion.TestAssignment.FileExtraction;
+using DataIngestion.TestAssignment.FileParsing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using Nest;
+using MediatR;
+using DataIngestion.TestAssignment.Pipeline;
 
 namespace DataIngestion.TestAssignment
 {
@@ -18,21 +24,9 @@ namespace DataIngestion.TestAssignment
             IServiceCollection services = ConfigureServices();
             ServiceProvider serviceProvider = services.BuildServiceProvider();
 
-            IFileDownloader fileDownloader = serviceProvider.GetRequiredService<IFileDownloader>();
-            var config = serviceProvider.GetRequiredService<IOptions<FilesToIngestConfiguration>>().Value;
-
-            await Task.WhenAll(
-                fileDownloader.DownloadAsync(config.Artist, @"c:\temp\artist"),
-                fileDownloader.DownloadAsync(config.ArtistCollection, @"c:\temp\artistCollection"),
-                fileDownloader.DownloadAsync(config.Collection, @"c:\temp\collection"),
-                fileDownloader.DownloadAsync(config.CollectionMatch, @"c:\temp\collectionMatch")
-            );
-
-            IFileExtractor fileExtractor= serviceProvider.GetRequiredService<IFileExtractor>();
-            fileExtractor.Extract(@"c:\temp\artist", @"c:\temp\job132");
-            fileExtractor.Extract(@"c:\temp\artistCollection", @"c:\temp\job132");
-            fileExtractor.Extract(@"c:\temp\collection", @"c:\temp\job132");
-            fileExtractor.Extract(@"c:\temp\collectionMatch", @"c:\temp\job132");
+            await serviceProvider
+                .GetRequiredService<App>()
+                .Run();
         }
 
         private static IServiceCollection ConfigureServices()
@@ -42,8 +36,15 @@ namespace DataIngestion.TestAssignment
             IServiceCollection services = new ServiceCollection();
 
             services.AddFileDownloadServicesConfiguration(configuration);
+            services.AddIndexingConfiguration(configuration);
+
+            services.AddApplication();
             services.AddFileDownloadServices();
             services.AddFileExtractionServices();
+            services.AddFileParsingServices();
+            services.AddDataStoreServices();
+            services.AddIndexingServices();
+            services.AddMediatR(typeof(Program));
 
             return services;
         }
