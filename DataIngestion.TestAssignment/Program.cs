@@ -2,6 +2,7 @@
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -36,6 +37,7 @@ namespace DataIngestion.TestAssignment
             services.AddDataStoreServices();
             services.AddIndexingServices();
             services.AddMediatR(typeof(Program));
+            services.AddLogging(loggingBuilder => loggingBuilder.AddConsole());
 
             return services;
         }

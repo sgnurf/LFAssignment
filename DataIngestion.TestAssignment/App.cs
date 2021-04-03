@@ -11,7 +11,7 @@ namespace DataIngestion.TestAssignment
     {
         private readonly IMediator mediator;
         private readonly InputFiles filesToIngest;
-        private readonly string extractedFilesFolder = Path.Combine(Path.GetTempPath(), "ExtractedFiles");
+        private readonly string extractedFilesFolder = "ExtractedFiles";
 
         public App(IMediator mediator, IOptions<InputFiles> filesToIngest)
         {
@@ -21,31 +21,25 @@ namespace DataIngestion.TestAssignment
 
         public async Task Run()
         {
-            string[] downloadedFiles = await DownloadFiles();
-            await ExtractFiles(downloadedFiles);
+            //await DownloadFiles();
+            await ExtractFiles();
             await LoadExtractedFiles();
             await IndexAlbums();
         }
 
-        private async Task<string[]> DownloadFiles()
+        private async Task DownloadFiles()
         {
-            return await mediator.Send(new DownloadFilesRequest
+            await mediator.Send(new DownloadFilesRequest
             {
-                Files = new string[]
-                {
-                    filesToIngest.Artist,
-                    filesToIngest.ArtistCollection,
-                    filesToIngest.Collection,
-                    filesToIngest.CollectionMatch
-                }
+                Files = GetFilesArray()
             });
         }
 
-        private async Task ExtractFiles(string[] files)
+        private async Task ExtractFiles()
         {
             await mediator.Send(new ExtractFilesRequest()
             {
-                Files = files,
+                Files = GetFilesArray(),
                 DestinationPath = extractedFilesFolder
             });
         }
@@ -68,5 +62,13 @@ namespace DataIngestion.TestAssignment
         {
             await mediator.Send(new IndexAlbumRequest());
         }
+
+        private string[] GetFilesArray() => new string[]
+        {
+            filesToIngest.Artist,
+            filesToIngest.ArtistCollection,
+            filesToIngest.Collection,
+            filesToIngest.CollectionMatch
+        };
     }
 }

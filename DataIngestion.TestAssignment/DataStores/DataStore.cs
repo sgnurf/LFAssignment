@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace DataIngestion.TestAssignment.DataStores
 {
@@ -20,9 +21,9 @@ namespace DataIngestion.TestAssignment.DataStores
             store[key] = item;
         }
 
-        public void AddMany(IEnumerable<TValue> items)
+        public async Task AddManyAsync(IAsyncEnumerable<TValue> items)
         {
-            foreach(TValue item in items)
+            await foreach(TValue item in items)
             {
                 Add(item);
             }

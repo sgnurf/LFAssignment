@@ -1,15 +1,13 @@
-﻿using DataIngestion.TestAssignment.Configuration;
-using DataIngestion.TestAssignment.FileDownload;
+﻿using DataIngestion.TestAssignment.FileDownload;
 using MediatR;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace DataIngestion.TestAssignment.Pipeline
 {
-    internal class DownloadFilesHandler : IRequestHandler<DownloadFilesRequest, string[]>
+    internal class DownloadFilesHandler : IRequestHandler<DownloadFilesRequest>
     {
         private readonly IFileDownloader fileDownloader;
 
@@ -18,26 +16,22 @@ namespace DataIngestion.TestAssignment.Pipeline
             this.fileDownloader = fileDownloader;
         }
 
-        public async Task<string[]> Handle(DownloadFilesRequest request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(DownloadFilesRequest request, CancellationToken cancellationToken)
         {
             string[] filesToDownload = request.Files;
 
-
-            IEnumerable<Task<string>> downloadTasks = filesToDownload.Select(
-                file => DownloadFile(file,cancellationToken)
+            IEnumerable<Task> downloadTasks = filesToDownload.Select(
+                file => DownloadFile(file, cancellationToken)
                 );
 
-            return await Task.WhenAll<string>(downloadTasks);
+            await Task.WhenAll(downloadTasks);
+
+            return Unit.Value;
         }
 
-        private async Task<string> DownloadFile(string file, CancellationToken cancellationToken)
+        private async Task DownloadFile(string file, CancellationToken cancellationToken)
         {
-            string targetPath = GetDestinationFilePath(file);
-            await fileDownloader.DownloadAsync(file, GetDestinationFilePath(file), cancellationToken);
-            return targetPath;
+            await fileDownloader.DownloadAsync(file, cancellationToken);
         }
-
-        //TODO: Make destination folder Configurable
-        private static string GetDestinationFilePath(string fileId) => Path.Combine(Path.GetTempPath(), fileId);
     }
 }

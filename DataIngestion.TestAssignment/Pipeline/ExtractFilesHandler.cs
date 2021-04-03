@@ -14,14 +14,14 @@ namespace DataIngestion.TestAssignment.Pipeline
             this.fileExtractor = fileExtractor;
         }
 
-        public Task<Unit> Handle(ExtractFilesRequest request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(ExtractFilesRequest request, CancellationToken cancellationToken)
         {
             foreach(string file in request.Files)
             {
-                fileExtractor.Extract(file, request.DestinationPath);
+                await fileExtractor.Extract(file, request.DestinationPath);
             }
 
-            return Unit.Task;
+            return Unit.Value;
         }
     }
 }

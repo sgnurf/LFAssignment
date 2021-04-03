@@ -31,22 +31,22 @@ namespace DataIngestion.TestAssignment.Pipeline
             this.collectionMatchStore = collectionMatchStore;
         }
 
-        public Task<Unit> Handle(LoadFilesRequest request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(LoadFilesRequest request, CancellationToken cancellationToken)
         {
 
-            IEnumerable<Artist> artists = fileParser.Parse<Artist>(request.files.Artist);
-            artistStore.AddMany(artists);
+            IAsyncEnumerable<Artist> artists = fileParser.Parse<Artist>(request.files.Artist);
+            IAsyncEnumerable<ArtistCollection> artistCollections = fileParser.Parse<ArtistCollection>(request.files.ArtistCollection);
+            IAsyncEnumerable<CollectionMatch> collectionMatches = fileParser.Parse<CollectionMatch>(request.files.CollectionMatch);
+            IAsyncEnumerable<Collection> collections = fileParser.Parse<Collection>(request.files.Collection);
 
-            IEnumerable<ArtistCollection> artistCollections = fileParser.Parse<ArtistCollection>(request.files.ArtistCollection);
-            artistCollectionStore.AddMany(artistCollections);
+            await Task.WhenAll(
+                artistStore.AddManyAsync(artists),
+                artistCollectionStore.AddManyAsync(artistCollections),
+                collectionMatchStore.AddManyAsync(collectionMatches),
+                collectionStore.AddManyAsync(collections)
+            );
 
-            IEnumerable<CollectionMatch> collectionMatches = fileParser.Parse<CollectionMatch>(request.files.CollectionMatch);
-            collectionMatchStore.AddMany(collectionMatches);
-
-            IEnumerable<Collection> collections =  fileParser.Parse<Collection>(request.files.Collection);
-            collectionStore.AddMany(collections);
-
-            return Unit.Task;
+            return Unit.Value;
         }
     }
 }

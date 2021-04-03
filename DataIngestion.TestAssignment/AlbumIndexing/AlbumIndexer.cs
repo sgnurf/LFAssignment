@@ -23,11 +23,7 @@ namespace DataIngestion.TestAssignment.AlbumIndexing
             BulkAllObservable<Album> bulkAllObservable = elasticClient.BulkAll(albums, 
                 b => b.Size(elasticSearchConfiguration.IndexingBatchSize));
             
-            bulkAllObservable.Wait(TimeSpan.FromMinutes(elasticSearchConfiguration.IndexingTimeoutInMinutes), next =>
-                Console.WriteLine(next.Page)
-            );
-
-            Console.WriteLine("Here");
+            bulkAllObservable.Wait(TimeSpan.FromMinutes(elasticSearchConfiguration.IndexingTimeoutInMinutes), next => { });
         }
     }
 }

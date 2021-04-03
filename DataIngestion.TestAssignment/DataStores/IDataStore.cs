@@ -1,5 +1,6 @@
 ﻿using DataIngestion.TestAssignment.InputModels;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace DataIngestion.TestAssignment.DataStores
 {
@@ -7,6 +8,6 @@ namespace DataIngestion.TestAssignment.DataStores
     {
         void Add(TValue item);
 
-        void AddMany(IEnumerable<TValue> items);
+        Task AddManyAsync(IAsyncEnumerable<TValue> items);
     }
 }

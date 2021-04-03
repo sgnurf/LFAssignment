@@ -5,6 +5,6 @@ namespace DataIngestion.TestAssignment.FileDownload
 {
     public interface IFileDownloader
     {
-        Task DownloadAsync(string fileId, string destinationPath, CancellationToken cancellationToken);
+        Task DownloadAsync(string fileId, CancellationToken cancellationToken);
     }
 }

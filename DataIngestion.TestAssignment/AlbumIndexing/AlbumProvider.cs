@@ -1,7 +1,6 @@
 ﻿using DataIngestion.TestAssignment.DataStores;
 using DataIngestion.TestAssignment.InputModels;
 using DataIngestion.TestAssignment.TargetModels;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,7 +8,7 @@ namespace DataIngestion.TestAssignment.AlbumIndexing
 {
     public class AlbumProvider : IAlbumProvider
     {
-        private readonly IDataProvider<long,Artist> artistProvider;
+        private readonly IDataProvider<long, Artist> artistProvider;
         private readonly IArtistCollectionProvider artistCollectionProvider;
         private readonly IDataProvider<long, Collection> collectionProvider;
         private readonly IDataProvider<long, CollectionMatch> collectionMatchProvider;
@@ -28,32 +27,15 @@ namespace DataIngestion.TestAssignment.AlbumIndexing
 
         public IEnumerable<Album> GetAlbums()
         {
-            foreach(Collection collection in collectionProvider.GetAll())
+            foreach (Collection collection in collectionProvider.GetAll())
             {
-                try
-                {
-                    yield return CreateAlbumRecord(collection);
-                }
-                finally
-                {
-
-                }
+                yield return CreateAlbumRecord(collection);
             }
         }
 
         private Album CreateAlbumRecord(Collection collection)
         {
-            IEnumerable<ArtistCollection> artistCollections = artistCollectionProvider.GetForCollection(collection.Id);
-
-            List<AlbumArtist> artists = new List<AlbumArtist>();
-            foreach (ArtistCollection artistCollection in artistCollections)
-            {
-                Artist artist = artistProvider.GetById(artistCollection.ArtistId);
-                if (artist != null)
-                {
-                    artists.Add(new AlbumArtist(artist.Id, artist.Name));
-                }
-            }
+            AlbumArtist[] artists = CreateAlbumArtists(collection);
 
             CollectionMatch collectionMatch = collectionMatchProvider.GetById(collection.Id);
 
@@ -66,7 +48,29 @@ namespace DataIngestion.TestAssignment.AlbumIndexing
                 collection.IsCompilation,
                 collection.LabelStudio,
                 collection.ArtworkUrl,
-                artists.ToArray());
+                artists);
+        }
+
+        private AlbumArtist[] CreateAlbumArtists(Collection collection)
+        {
+            IEnumerable<ArtistCollection> artistCollections = artistCollectionProvider.GetForCollection(collection.Id);
+
+            if (artistCollections == null)
+            {
+                return new AlbumArtist[0];
+            }
+
+            List<AlbumArtist> artists = new List<AlbumArtist>();
+            foreach (ArtistCollection artistCollection in artistCollections)
+            {
+                Artist artist = artistProvider.GetById(artistCollection.ArtistId);
+                if (artist != null)
+                {
+                    artists.Add(new AlbumArtist(artist.Id, artist.Name));
+                }
+            }
+
+            return artists.ToArray();
         }
     }
 }

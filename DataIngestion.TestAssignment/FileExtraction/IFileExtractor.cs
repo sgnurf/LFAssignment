@@ -1,7 +1,9 @@
-﻿namespace DataIngestion.TestAssignment.FileExtraction
+﻿using System.Threading.Tasks;
+
+namespace DataIngestion.TestAssignment.FileExtraction
 {
     public interface IFileExtractor
     {
-        void Extract(string archiveFile, string destinationFolder);
+        Task Extract(string archiveFile, string destinationFolder);
     }
 }

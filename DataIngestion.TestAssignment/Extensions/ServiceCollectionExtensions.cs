@@ -11,6 +11,8 @@ using Nest;
 using Microsoft.Extensions.Options;
 using System;
 using DataIngestion.TestAssignment.DataStores;
+using Storage.Net.Blobs;
+using Storage.Net;
 
 namespace DataIngestion.TestAssignment.Extensions
 {
@@ -25,12 +27,18 @@ namespace DataIngestion.TestAssignment.Extensions
         {
             services.AddSingleton<IGoogleServiceInitialiseProvider, GoogleServiceInitialiseProvider>();
             services.AddSingleton<IFileDownloader, GoogleDriveFileDownloader>();
+            services.AddSingleton<IBlobStorage>( sp =>
+            {
+                var configuration = sp.GetRequiredService<IOptions<StorageConfiguration>>();
+                return StorageFactory.Blobs.FromConnectionString(configuration.Value.ConnectionString);
+            });
         }
 
         public static void AddFileDownloadServicesConfiguration(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<GoogleApiConfiguration>(configuration.GetSection("GoogleApi"));
             services.Configure<InputFiles>(configuration.GetSection("FilesToIngest"));
+            services.Configure<StorageConfiguration>(configuration.GetSection("Storage"));
         }
 
         public static void AddFileExtractionServices(this IServiceCollection services)
@@ -40,13 +48,12 @@ namespace DataIngestion.TestAssignment.Extensions
 
         public static void AddFileParsingServices(this IServiceCollection services)
         {
-            services.AddSingleton(typeof(IDataBaseTableFileParser<>),typeof(DataBaseTableFileParser<>));
             services.AddSingleton<ILineParser<Artist>, ArtistLineParser>();
             services.AddSingleton<ILineParser<Collection>, CollectionLineParser>();
             services.AddSingleton<ILineParser<ArtistCollection>, ArtistCollectionLineParser>();
             services.AddSingleton<ILineParser<CollectionMatch>, CollectionMatchLineParser>();
-            services.AddSingleton<IDataBaseTableFileParserFactory, DataBaseTableFileParserFactory>();
             services.AddSingleton<IFileParser, FileParser>();
+            services.AddSingleton<ILineParserFactory, LineParserFactory>();
         }
 
         public static void AddDataStoreServices(this IServiceCollection services)

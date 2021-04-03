@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace DataIngestion.TestAssignment.FileParsing
 {
     public interface IFileParser
     {
-        IEnumerable<T> Parse<T>(string file);
+        IAsyncEnumerable<T> Parse<T>(string file);
     }
 }
