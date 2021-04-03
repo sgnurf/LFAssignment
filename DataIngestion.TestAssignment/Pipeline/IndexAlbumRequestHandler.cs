@@ -21,7 +21,7 @@ namespace DataIngestion.TestAssignment.Pipeline
         public Task<Unit> Handle(IndexAlbumRequest request, CancellationToken cancellationToken)
         {
             IEnumerable<Album> albums = albumProvider.GetAlbums();
-            albumIndexer.Index(albums);
+            albumIndexer.Index(albums, cancellationToken);
 
             return Unit.Task;
         }

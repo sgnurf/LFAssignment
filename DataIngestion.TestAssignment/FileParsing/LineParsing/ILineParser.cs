@@ -2,6 +2,6 @@
 {
     public interface ILineParser<T>
     {
-        T ParseLine(string[] values);
+        T ParseLine(string line);
     }
 }

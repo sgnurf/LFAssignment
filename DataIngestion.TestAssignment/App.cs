@@ -21,7 +21,7 @@ namespace DataIngestion.TestAssignment
 
         public async Task Run()
         {
-            //await DownloadFiles();
+            await DownloadFiles();
             await ExtractFiles();
             await LoadExtractedFiles();
             await IndexAlbums();

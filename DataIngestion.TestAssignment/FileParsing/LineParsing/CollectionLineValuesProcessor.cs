@@ -4,9 +4,11 @@ using System;
 
 namespace DataIngestion.TestAssignment.FileParsing.LineParsing
 {
-    public class CollectionLineParser : ILineParser<Collection>
+    public class CollectionLineValuesProcessor : AbstractLineValuesProcessor<Collection>
     {
-        public Collection ParseLine(string[] values)
+        protected override int ExpectedValueCount => 18;
+
+        protected override Collection ProcessValuesInternal(string[] values)
         {
             return new Collection(
                 Id: long.Parse(values[1]),

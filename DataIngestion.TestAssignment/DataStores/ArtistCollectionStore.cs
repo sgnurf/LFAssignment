@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace DataIngestion.TestAssignment.DataStores
 {
-    internal class ArtistCollectionStore : DataStore<(long, long, int), ArtistCollection>, IArtistCollectionProvider
+    internal class ArtistCollectionStore : DataStore<(long, long, int?), ArtistCollection>, IArtistCollectionProvider
     {
         private readonly Dictionary<long, IList<ArtistCollection>> artistCollectionsByCollection = new Dictionary<long, IList<ArtistCollection>>();
 

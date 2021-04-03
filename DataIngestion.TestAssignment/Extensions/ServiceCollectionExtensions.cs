@@ -25,7 +25,7 @@ namespace DataIngestion.TestAssignment.Extensions
 
         public static void AddFileDownloadServices(this IServiceCollection services)
         {
-            services.AddSingleton<IGoogleServiceInitialiseProvider, GoogleServiceInitialiseProvider>();
+            services.AddSingleton<IGoogleDriveService, GoogleDriveService>();
             services.AddSingleton<IFileDownloader, GoogleDriveFileDownloader>();
             services.AddSingleton<IBlobStorage>( sp =>
             {
@@ -48,30 +48,31 @@ namespace DataIngestion.TestAssignment.Extensions
 
         public static void AddFileParsingServices(this IServiceCollection services)
         {
-            services.AddSingleton<ILineParser<Artist>, ArtistLineParser>();
-            services.AddSingleton<ILineParser<Collection>, CollectionLineParser>();
-            services.AddSingleton<ILineParser<ArtistCollection>, ArtistCollectionLineParser>();
-            services.AddSingleton<ILineParser<CollectionMatch>, CollectionMatchLineParser>();
+            services.AddSingleton<ILineValuesProcessor<Artist>, ArtistLineValuesProcessor>();
+            services.AddSingleton<ILineValuesProcessor<Collection>, CollectionLineValuesProcessor>();
+            services.AddSingleton<ILineValuesProcessor<ArtistCollection>, ArtistCollectionLineParser>();
+            services.AddSingleton<ILineValuesProcessor<CollectionMatch>, CollectionMatchLineValuesProcessor>();
             services.AddSingleton<IFileParser, FileParser>();
             services.AddSingleton<ILineParserFactory, LineParserFactory>();
+            services.AddSingleton(typeof(ILineParser<>), typeof(LineParser<>));
         }
 
         public static void AddDataStoreServices(this IServiceCollection services)
         {
-            AddDataStore<long, Artist>(a => a.Id);
-            AddDataStore<long, Collection>(c => c.Id);
-            AddDataStore<long, CollectionMatch>(cm => cm.CollectionId);
+            AddDataStore<ArtistStore, IArtistProvider, long, Artist>();
+            AddDataStore<CollectionStore, ICollectionProvider, long, Collection>();
+            AddDataStore<CollectionMatchStore, ICollectionMatchProvider, long, CollectionMatch>();
+            AddDataStore<ArtistCollectionStore, IArtistCollectionProvider, (long, long, int?), ArtistCollection>();
 
-            services.AddSingleton<ArtistCollectionStore>();
-            services.AddSingleton<IArtistCollectionProvider>(serviceProvider => serviceProvider.GetRequiredService<ArtistCollectionStore>());            
-            services.AddSingleton<IDataStore<ArtistCollection>>(serviceProvider => serviceProvider.GetRequiredService<ArtistCollectionStore>());
-            services.AddSingleton<IDataProvider<(long, long, int), ArtistCollection>>(serviceProvider => serviceProvider.GetRequiredService<ArtistCollectionStore>());
+            void AddDataStore<TImplementation,TProviderInterface, TKey, TValue>()
+                where TProviderInterface : class, IDataProvider<TKey, TValue>
+                where TImplementation: class, TProviderInterface, IDataStore<TValue>
 
-            void AddDataStore<TKey, TValue>(GetKey<TKey,TValue> keySelector)
             {
-                services.AddSingleton<DataStore<TKey, TValue>>(serviceProvider => new DataStore<TKey, TValue>(keySelector));
-                services.AddSingleton<IDataStore<TValue>>(serviceProvider => serviceProvider.GetRequiredService<DataStore<TKey, TValue>>());
-                services.AddSingleton<IDataProvider<TKey, TValue>>(serviceProvider => serviceProvider.GetRequiredService<DataStore<TKey, TValue>>());
+                services.AddSingleton<TImplementation>();
+                services.AddSingleton<TProviderInterface>(serviceProvider => serviceProvider.GetRequiredService<TImplementation>());
+                services.AddSingleton<IDataStore<TValue>>(serviceProvider => serviceProvider.GetRequiredService<TImplementation>());
+                services.AddSingleton<IDataProvider<TKey, TValue>>(serviceProvider => serviceProvider.GetRequiredService<TImplementation>());
             }
         }
 
@@ -79,6 +80,7 @@ namespace DataIngestion.TestAssignment.Extensions
         {
             services.AddTransient<IAlbumIndexer, AlbumIndexer>();
             services.AddSingleton<IAlbumProvider, AlbumProvider>();
+            services.AddSingleton<IAlbumFactory, AlbumFactory>();
             services.AddTransient<IElasticClient>( (serviceProvider) =>
                 {
                     IOptions<ElasticSearchConfiguration> options = serviceProvider.GetRequiredService<IOptions<ElasticSearchConfiguration>>();

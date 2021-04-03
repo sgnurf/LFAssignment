@@ -3,9 +3,11 @@ using DataIngestion.TestAssignment.InputModels;
 
 namespace DataIngestion.TestAssignment.FileParsing.LineParsing
 {
-    public class CollectionMatchLineParser : ILineParser<CollectionMatch>
+    public class CollectionMatchLineValuesProcessor : AbstractLineValuesProcessor<CollectionMatch>
     {
-        public CollectionMatch ParseLine(string[] values)
+        protected override int ExpectedValueCount => 5;
+
+        protected override CollectionMatch ProcessValuesInternal(string[] values)
         {
             return new CollectionMatch(
                 CollectionId: long.Parse(values[1]),

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace DataIngestion.TestAssignment.Pipeline
 {
-    internal class ExtractFilesHandler : IRequestHandler<ExtractFilesRequest>
+    public class ExtractFilesHandler : IRequestHandler<ExtractFilesRequest>
     {
         private readonly IFileExtractor fileExtractor;
 
@@ -18,7 +18,7 @@ namespace DataIngestion.TestAssignment.Pipeline
         {
             foreach(string file in request.Files)
             {
-                await fileExtractor.Extract(file, request.DestinationPath);
+                await fileExtractor.Extract(file, request.DestinationPath, cancellationToken);
             }
 
             return Unit.Value;

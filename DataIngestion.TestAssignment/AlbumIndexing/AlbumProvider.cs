@@ -8,69 +8,28 @@ namespace DataIngestion.TestAssignment.AlbumIndexing
 {
     public class AlbumProvider : IAlbumProvider
     {
-        private readonly IDataProvider<long, Artist> artistProvider;
-        private readonly IArtistCollectionProvider artistCollectionProvider;
-        private readonly IDataProvider<long, Collection> collectionProvider;
-        private readonly IDataProvider<long, CollectionMatch> collectionMatchProvider;
+        private readonly ICollectionProvider collectionProvider;
+        private readonly IAlbumFactory albumFactory;
 
-        public AlbumProvider(
-            IDataProvider<long, Artist> artistProvider,
-            IArtistCollectionProvider artistCollectionProvider,
-            IDataProvider<long, Collection> collectionProvider,
-            IDataProvider<long, CollectionMatch> collectionMatchProvider)
+        public AlbumProvider(ICollectionProvider collectionProvider, IAlbumFactory albumFactory)
         {
-            this.artistProvider = artistProvider;
-            this.artistCollectionProvider = artistCollectionProvider;
             this.collectionProvider = collectionProvider;
-            this.collectionMatchProvider = collectionMatchProvider;
+            this.albumFactory = albumFactory;
         }
 
         public IEnumerable<Album> GetAlbums()
         {
+            IEnumerable<Collection> collections = collectionProvider.GetAll();
+            
+            if(collections == null)
+            {
+                yield break;
+            }
+
             foreach (Collection collection in collectionProvider.GetAll())
             {
-                yield return CreateAlbumRecord(collection);
+                yield return albumFactory.CreateAlbum(collection);
             }
-        }
-
-        private Album CreateAlbumRecord(Collection collection)
-        {
-            AlbumArtist[] artists = CreateAlbumArtists(collection);
-
-            CollectionMatch collectionMatch = collectionMatchProvider.GetById(collection.Id);
-
-            return new Album(
-                collection.Id,
-                collection.Name,
-                collection.ViewUrl,
-                collectionMatch?.Upc,
-                collection.OriginalReleaseDate,
-                collection.IsCompilation,
-                collection.LabelStudio,
-                collection.ArtworkUrl,
-                artists);
-        }
-
-        private AlbumArtist[] CreateAlbumArtists(Collection collection)
-        {
-            IEnumerable<ArtistCollection> artistCollections = artistCollectionProvider.GetForCollection(collection.Id);
-
-            if (artistCollections == null)
-            {
-                return new AlbumArtist[0];
-            }
-
-            List<AlbumArtist> artists = new List<AlbumArtist>();
-            foreach (ArtistCollection artistCollection in artistCollections)
-            {
-                Artist artist = artistProvider.GetById(artistCollection.ArtistId);
-                if (artist != null)
-                {
-                    artists.Add(new AlbumArtist(artist.Id, artist.Name));
-                }
-            }
-
-            return artists.ToArray();
         }
     }
 }

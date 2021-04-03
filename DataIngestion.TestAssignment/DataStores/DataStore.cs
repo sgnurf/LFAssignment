@@ -5,7 +5,7 @@ namespace DataIngestion.TestAssignment.DataStores
 {
     public delegate TKey GetKey<TKey, TValue>(TValue value);
 
-    internal class DataStore<TKey, TValue> : IDataStore<TValue>, IDataProvider<TKey, TValue>
+    public class DataStore<TKey, TValue> : IDataStore<TValue>, IDataProvider<TKey, TValue>
     {
         private readonly GetKey<TKey, TValue> keySelector;
         Dictionary<TKey, TValue> store = new Dictionary<TKey, TValue>();

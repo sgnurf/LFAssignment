@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using Nest;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace DataIngestion.TestAssignment.AlbumIndexing
 {
@@ -18,11 +19,11 @@ namespace DataIngestion.TestAssignment.AlbumIndexing
             this.elasticSearchConfiguration = elasticSearchConfiguration.Value;
         }
 
-        public void Index(IEnumerable<Album> albums)
+        public void Index(IEnumerable<Album> albums, CancellationToken cancellationToken)
         {
-            BulkAllObservable<Album> bulkAllObservable = elasticClient.BulkAll(albums, 
-                b => b.Size(elasticSearchConfiguration.IndexingBatchSize));
-            
+            BulkAllObservable<Album> bulkAllObservable = elasticClient.BulkAll(albums,
+                b => b.Size(elasticSearchConfiguration.IndexingBatchSize), cancellationToken);
+
             bulkAllObservable.Wait(TimeSpan.FromMinutes(elasticSearchConfiguration.IndexingTimeoutInMinutes), next => { });
         }
     }
