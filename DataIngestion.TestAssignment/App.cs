@@ -21,17 +21,31 @@ namespace DataIngestion.TestAssignment
 
         public async Task Run()
         {
-            InputFiles files = await DownloadFiles();
-            await ExtractFiles(files);
+            string[] downloadedFiles = await DownloadFiles();
+            await ExtractFiles(downloadedFiles);
             await LoadExtractedFiles();
             await IndexAlbums();
         }
 
-        private async Task ExtractFiles(InputFiles files)
+        private async Task<string[]> DownloadFiles()
+        {
+            return await mediator.Send(new DownloadFilesRequest
+            {
+                Files = new string[]
+                {
+                    filesToIngest.Artist,
+                    filesToIngest.ArtistCollection,
+                    filesToIngest.Collection,
+                    filesToIngest.CollectionMatch
+                }
+            });
+        }
+
+        private async Task ExtractFiles(string[] files)
         {
             await mediator.Send(new ExtractFilesRequest()
             {
-                Files = new string[] { files.Artist, files.ArtistCollection, files.Collection, files.CollectionMatch },
+                Files = files,
                 DestinationPath = extractedFilesFolder
             });
         }
@@ -53,11 +67,6 @@ namespace DataIngestion.TestAssignment
         private async Task IndexAlbums()
         {
             await mediator.Send(new IndexAlbumRequest());
-        }
-
-        private async Task<InputFiles> DownloadFiles()
-        {
-            return await mediator.Send(new DownloadFilesRequest { Files = filesToIngest });
         }
     }
 }

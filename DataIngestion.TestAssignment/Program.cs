@@ -1,19 +1,10 @@
-﻿using DataIngestion.TestAssignment.Configuration;
-using DataIngestion.TestAssignment.InputModels;
-using DataIngestion.TestAssignment.Extensions;
-using DataIngestion.TestAssignment.FileDownload;
-using DataIngestion.TestAssignment.FileExtraction;
-using DataIngestion.TestAssignment.FileParsing;
+﻿using DataIngestion.TestAssignment.Extensions;
+using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
-using Nest;
-using MediatR;
-using DataIngestion.TestAssignment.Pipeline;
 
 namespace DataIngestion.TestAssignment
 {
