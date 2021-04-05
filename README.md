@@ -16,7 +16,7 @@ or use dotnet secrets
 
 ## Points fo interests
 
-* Each phase (Download, Extract, Read/Load, Index) is decouple through the usage of MediatR. It would be simple to change the MediatR handler to be Azure Service Bus or Event Hubs handlers
+* Each phase (Download, Extract, Read/Load, Index) is decoupled by using in-process messaging with MediatR. It can easily be replaced with a cloud based messaging system
 * Access to files has been abstracted. Where the files are stored (local disk, Azure Blob, ...) can be changed through configuration
 
 ## Potential Improvements
